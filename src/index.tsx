@@ -7,23 +7,42 @@ const Input = ({ input, setInput, item, setItem }) => {
   const inputHandler = (e) => {
     setInput(e.target.value);
   };
+
   const clickHandler = (e) => {
-    setItem([...item, input]);
+    // 新增id，以object形式更新至state
+    setItem([...item, { input, id: uuidv4() }]);
+    setInput('');
   };
+
   return (
     <div>
-      <input type="text" onChange={inputHandler} />
+      <input type="text" onChange={inputHandler} value={input} />
       <button onClick={clickHandler}>新增</button>
     </div>
   );
 };
 
-const List = ({ item }) => {
-  // 取出item這個props，使用map
+const List = ({ item, setItem }) => {
+  const deleteHandler = (e) => {
+    e.preventDefault();
+    // 選取li標籤
+    const li = e.target.parentElement;
+    // filter
+    const newItem = item.filter((element) => element.id !== li.id);
+    //更新state
+    setItem(newItem);
+  };
+
   const list = item.map((i) => {
-    const id = uuidv4();
-    console.log(id);
-    return <li key={id}>{i}</li>;
+    const { id, input } = i;
+    return (
+      <li key={id} id={id}>
+        <span>{input}</span>
+        <a href="" style={{ marginLeft: '1.5rem' }} onClick={deleteHandler}>
+          delete
+        </a>
+      </li>
+    );
   });
   return <ul>{list}</ul>;
 };
@@ -35,7 +54,7 @@ const App = () => {
   return (
     <>
       <Input input={input} setInput={setInput} item={item} setItem={setItem} />
-      <List item={item} />
+      <List item={item} setItem={setItem} />
     </>
   );
 };
