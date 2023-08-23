@@ -10,6 +10,7 @@ import {
   InputGroup,
   Form,
   Card,
+  Stack,
 } from 'react-bootstrap';
 
 const Input = ({ input, setInput, item, setItem }) => {
@@ -18,11 +19,9 @@ const Input = ({ input, setInput, item, setItem }) => {
   };
 
   const clickHandler = (e) => {
-    // 新增id，以object形式更新至state
-    setItem([...item, { input, id: uuidv4() }]);
+    setItem([...item, { content: input, id: uuidv4() }]);
     setInput('');
   };
-
   return (
     <InputGroup className="mb-3">
       <Form.Control type="text" onChange={inputHandler} value={input} />
@@ -32,33 +31,67 @@ const Input = ({ input, setInput, item, setItem }) => {
 };
 
 const List = ({ item, setItem }) => {
+  const [isEdit, setIsEdit] = useState('');
+  const [input, setInput] = useState('');
+  const [newInput, setNewInput] = useState('');
+
   const deleteHandler = (e) => {
     e.preventDefault();
-    // 選取li標籤
-    const li = e.target.parentElement;
-    // filter
-    const newItem = item.filter((element) => element.id !== li.id);
-    //更新state
+    const parent = e.target.parentElement.parentElement;
+
+    const newItem = item.filter((element) => element.id !== parent.id);
+
+    setItem(newItem);
+  };
+
+  const editedHandler = (e) => {
+    const newItem = item.map((i) => {
+      const { id, content } = i;
+      if (id === isEdit) {
+        i.content = newInput;
+        return i;
+      }
+      return i;
+    });
+    setIsEdit('');
     setItem(newItem);
   };
 
   const list = item.map((i, index) => {
-    const { input, id } = i;
+    const { content, id } = i;
     return (
       <div key={id}>
-        <Card>
-          {/*把id改放入這裡，方便deleteHandler取值*/}
-          <Card.Body id={id} className="d-flex justify-content-between">
-            {input}
-            <Card.Link
-              href="#"
-              style={{ marginLeft: '1.5rem' }}
-              onClick={deleteHandler}
-            >
-              delete
-            </Card.Link>
-          </Card.Body>
-        </Card>
+        {!(isEdit === id) ? (
+          <Card>
+            <Card.Body id={id} className="d-flex justify-content-between">
+              {content}
+              <Stack direction="horizontal" gap={3}>
+                <Card.Link
+                  href="#"
+                  onClick={() => {
+                    setIsEdit(id);
+                  }}
+                >
+                  edit
+                </Card.Link>
+                <Card.Link href="#" onClick={deleteHandler}>
+                  delete
+                </Card.Link>
+              </Stack>
+            </Card.Body>
+          </Card>
+        ) : (
+          <InputGroup className="my-3">
+            <Form.Control
+              type="text"
+              onChange={(e) => {
+                setNewInput(e.target.value);
+              }}
+              defaultValue={content}
+            />
+            <Button onClick={editedHandler}>提交</Button>
+          </InputGroup>
+        )}
       </div>
     );
   });
