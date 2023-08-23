@@ -2,6 +2,15 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom/client';
 import { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import {
+  Button,
+  Container,
+  Row,
+  Col,
+  InputGroup,
+  Form,
+  Card,
+} from 'react-bootstrap';
 
 const Input = ({ input, setInput, item, setItem }) => {
   const inputHandler = (e) => {
@@ -15,10 +24,10 @@ const Input = ({ input, setInput, item, setItem }) => {
   };
 
   return (
-    <div>
-      <input type="text" onChange={inputHandler} value={input} />
-      <button onClick={clickHandler}>新增</button>
-    </div>
+    <InputGroup className="mb-3">
+      <Form.Control type="text" onChange={inputHandler} value={input} />
+      <Button onClick={clickHandler}>新增</Button>
+    </InputGroup>
   );
 };
 
@@ -33,18 +42,27 @@ const List = ({ item, setItem }) => {
     setItem(newItem);
   };
 
-  const list = item.map((i) => {
-    const { id, input } = i;
+  const list = item.map((i, index) => {
+    const { input, id } = i;
     return (
-      <li key={id} id={id}>
-        <span>{input}</span>
-        <a href="" style={{ marginLeft: '1.5rem' }} onClick={deleteHandler}>
-          delete
-        </a>
-      </li>
+      <div key={id}>
+        <Card>
+          {/*把id改放入這裡，方便deleteHandler取值*/}
+          <Card.Body id={id} className="d-flex justify-content-between">
+            {input}
+            <Card.Link
+              href="#"
+              style={{ marginLeft: '1.5rem' }}
+              onClick={deleteHandler}
+            >
+              delete
+            </Card.Link>
+          </Card.Body>
+        </Card>
+      </div>
     );
   });
-  return <ul>{list}</ul>;
+  return <div>{list}</div>;
 };
 
 const App = () => {
@@ -53,8 +71,23 @@ const App = () => {
 
   return (
     <>
-      <Input input={input} setInput={setInput} item={item} setItem={setItem} />
-      <List item={item} setItem={setItem} />
+      <Container>
+        <Row>
+          <Col xs="5" className="mx-auto">
+            <div className="py-3">
+              {/*新增一個h1標題*/}
+              <h1 className="text-center">Todo List</h1>
+              <Input
+                input={input}
+                setInput={setInput}
+                item={item}
+                setItem={setItem}
+              />
+              <List item={item} setItem={setItem} />
+            </div>
+          </Col>
+        </Row>
+      </Container>
     </>
   );
 };
