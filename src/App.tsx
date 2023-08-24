@@ -1,106 +1,31 @@
 import * as React from 'react';
-import { useState } from 'react';
-import { v4 as uuidv4 } from 'uuid';
+import { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import {
-  Button,
-  Container,
-  Row,
-  Col,
-  InputGroup,
-  Form,
-  Card,
-  Stack,
-} from 'react-bootstrap';
+import { Container, Row, Col } from 'react-bootstrap';
 
-const Input = ({ input, setInput, item, setItem }) => {
-  const inputHandler = (e) => {
-    setInput(e.target.value);
-  };
-
-  const clickHandler = (e) => {
-    setItem([...item, { content: input, id: uuidv4() }]);
-    setInput('');
-  };
-  return (
-    <InputGroup className="mb-3">
-      <Form.Control type="text" onChange={inputHandler} value={input} />
-      <Button onClick={clickHandler}>新增</Button>
-    </InputGroup>
-  );
-};
-
-const List = ({ item, setItem }) => {
-  const [isEdit, setIsEdit] = useState('');
-  const [input, setInput] = useState('');
-  const [newInput, setNewInput] = useState('');
-
-  const deleteHandler = (e) => {
-    e.preventDefault();
-    const parent = e.target.parentElement.parentElement;
-
-    const newItem = item.filter((element) => element.id !== parent.id);
-
-    setItem(newItem);
-  };
-
-  const editedHandler = (e) => {
-    const newItem = item.map((i) => {
-      const { id, content } = i;
-      if (id === isEdit) {
-        i.content = newInput;
-        return i;
-      }
-      return i;
-    });
-    setIsEdit('');
-    setItem(newItem);
-  };
-
-  const list = item.map((i, index) => {
-    const { content, id } = i;
-    return (
-      <div key={id}>
-        {!(isEdit === id) ? (
-          <Card>
-            <Card.Body id={id} className="d-flex justify-content-between">
-              {content}
-              <Stack direction="horizontal" gap={3}>
-                <Card.Link
-                  href="#"
-                  onClick={() => {
-                    setIsEdit(id);
-                  }}
-                >
-                  edit
-                </Card.Link>
-                <Card.Link href="#" onClick={deleteHandler}>
-                  delete
-                </Card.Link>
-              </Stack>
-            </Card.Body>
-          </Card>
-        ) : (
-          <InputGroup className="my-3">
-            <Form.Control
-              type="text"
-              onChange={(e) => {
-                setNewInput(e.target.value);
-              }}
-              defaultValue={content}
-            />
-            <Button onClick={editedHandler}>提交</Button>
-          </InputGroup>
-        )}
-      </div>
-    );
-  });
-  return <div>{list}</div>;
-};
+import Input from './Input';
+import Tab from './Tab';
 
 export default function App() {
   const [input, setInput] = useState('');
   const [item, setItem] = useState([]);
+  const [done, setDone] = useState([]);
+  const [yet, setYet] = useState([]);
+
+  useEffect(() => {
+    // 若項目長度不為0，處理項目
+    if (item.length !== 0) {
+      const newDone = item.filter((i) => i.isDone === true);
+      const newYet = item.filter((i) => i.isDone === false);
+
+      setDone(newDone);
+      setYet(newYet);
+    } else {
+      // 若長度為0，則將done、yet設為空Array
+      setDone([]);
+      setYet([]);
+    }
+  }, [item]);
 
   return (
     <>
@@ -116,7 +41,14 @@ export default function App() {
                 item={item}
                 setItem={setItem}
               />
-              <List item={item} setItem={setItem} />
+              <Tab
+                item={item}
+                done={done}
+                yet={yet}
+                setItem={setItem}
+                setDone={setDone}
+                setYet={setYet}
+              />
             </div>
           </Col>
         </Row>
